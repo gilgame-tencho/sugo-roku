@@ -1,21 +1,28 @@
-<!DOCTYPE html>
-<html lang="ja">
+<html>
   <head>
-    <title>Client</title>
-    <meta charset="UTF-8">
+    <title>battle's</title>
     <meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
     <script src="/socket.io/socket.io.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
   </head>
-  <body style="
-    display: flex; flex-direction: column; width: 100%; height: 100%; margin: 0;
-    background-image : url(/static/images/background/bk_coruk.jpg);background-repeat: repeat;">
-    <form>
-        <input type="text" value="xxxx" id="name" style="display: none;">
-        <input type="text" name="userName"></input>
-        <button id="login" onClick="login()">ログイン</button>
-    </form>
-    <img id="img_player_face" src="/static/images/charactor/player_face.jpg" style="display: none;">
-    <script src="/static/login.js"></script>
+  <body style="display: flex; flex-direction: column; width: 100%; height: 100%; margin: 0;">
+    <div>battle's</div>
+    <div style="flex: 1 1; position: relative; overflow:hidden;">
+        <div id="start-screen" style="width:100%; height:100%; display: flex; align-items: center; position:absolute; z-index:10;background-color:rgba(128,128,128,0.5);">
+            <div style="text-align: center; width: 100%; font-size: xx-large;">
+                <input type="text" name="nickname" id="nickname" placeholder="Your nickname" autofocus><br/><br/>
+                <button style="font-size: xx-large;" id="start-button">Start</button>
+            </div>
+        </div>
+        <canvas id="canvas-2d" width="1000" height="1000" style="position:absolute;width:100%;height:100%;object-fit:contain;"></canvas>
+    </div>
+    <img id="player-image" src="/static/images/charactor/wadordi.png" style="display: none;">
+    <img id="bot-image" src="/static/images/charactor/scal.png" style="display: none;">
+
+    <div class="debug_area" style="display:flex; height:50px">
+        <div style="font-size:18px; margin-right:5px;">debug area:</div><div id="output">　</div><div id="log" style="margin-left:80px"></div>
+    </div>
+
+    <script src="/static/index.js"></script>
   </body>
 </html>
