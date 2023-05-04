@@ -13,7 +13,9 @@ const yaml = require('yaml');
 // ### system param, common methods ###
 const server_conf = yaml.parse(fs.readFileSync(__dirname + '/conf/server_conf.yml', 'utf-8'));
 
-const FIELD_WIDTH = server_conf.FIELD_WIDTH, FIELD_HEIGHT = server_conf.FIELD_HEIGHT;
+const FIELD_WIDTH = server_conf.FIELD_WIDTH;
+const FIELD_HEIGHT = server_conf.FIELD_HEIGHT;
+const FPS = server_conf.FPS;
 
 class loggerClass{
   constructor(obj={}){
@@ -290,7 +292,7 @@ setInterval(() => {
         });
     });
     io.sockets.emit('state', players, bullets, walls);
-}, 1000/30);
+}, 1000/FPS);
 
 if(server_conf.debug_process) {
   let logh = "[Debug Process] ";
