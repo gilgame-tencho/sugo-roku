@@ -1,0 +1,5 @@
+// Server config
+port: 3000
+
+// Game base config
+FPS: 30

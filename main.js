@@ -7,8 +7,11 @@ const socketIO = require('socket.io');
 const app = express();
 const server = http.Server(app);
 const io = socketIO(server);
+const yaml = require('yaml');
 
 // ### system param, common methods ###
+const server_conf = yaml.parse(fs.readFileSync(__dirname + '/mydb/server_conf.yml', 'utf-8'));
+
 const FIELD_WIDTH = 1000, FIELD_HEIGHT = 1000;
 
 class loggerClass{
