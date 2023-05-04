@@ -8,8 +8,8 @@ const app = express();
 const server = http.Server(app);
 const io = socketIO(server);
 
-
 const FIELD_WIDTH = 1000, FIELD_HEIGHT = 1000;
+
 class GameObject{
     constructor(obj={}){
         this.id = Math.floor(Math.random()*1000000000);
@@ -39,14 +39,12 @@ class GameObject{
         return !collision;
     }
     intersect(obj){
-        // atari hantei?
         return (this.x <= obj.x + obj.width) &&
             (this.x + this.width >= obj.x) &&
             (this.y <= obj.y + obj.height) &&
             (this.y + this.height >= obj.y);
     }
     intersectWalls(){
-        // wall atari hantei?
         return Object.values(walls).some((wall) => {
             if(this.intersect(wall)){
                 return true;
@@ -83,7 +81,6 @@ class Player extends GameObject{
             console.log('init player!'+ Math.random());
             this.x = Math.random() * (FIELD_WIDTH - this.width);
             this.y = Math.random() * (FIELD_HEIGHT - this.height);
-            // this.angle = Math.random() * 2 * Math.PI;
             this.angle = 0;
             this.direction = 0;  // direction is right:0, left:1;
         }while(this.intersectWalls());
@@ -177,7 +174,7 @@ for(let i=0; i<3; i++){
 }
 
 let bots = {};
-for(let i=0; i<5; i++){
+for(let i=0; i<1; i++){
     const bot = new BotPlayer({nickname: 'ソルジャー'+(i+1)});
     players[bot.id] = bot;
     bots[bot.id] = bot;
@@ -197,7 +194,6 @@ io.on('connection', function(socket) {
         player.movement = movement;
     });
     socket.on('shoot', function(){
-        // console.log('shoot');
         if(!player || player.health===0){return;}
         player.shoot();
     });
@@ -258,7 +254,7 @@ setInterval(() => {
 setInterval(() => {
     // debug.
     Object.values(players).forEach((player) => {
-        console.log("ID:" + player.id + "\tType:" + player.player_type);
+        // console.log("ID:" + player.id + "\tType:" + player.player_type);
     });
 }, 1000*5);
 
