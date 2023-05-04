@@ -4,5 +4,8 @@ port: 3000
 loglevel: debug
 debug_process: true
 
+FIELD_WIDTH: 1000
+FIELD_HEIGHT: 1000
+
 # Game base config
 FPS: 30
