@@ -8,7 +8,46 @@ const app = express();
 const server = http.Server(app);
 const io = socketIO(server);
 
+// ### system param, common methods ###
 const FIELD_WIDTH = 1000, FIELD_HEIGHT = 1000;
+
+class loggerClass{
+  constructor(obj={}){
+      this.level_no = {
+          debug: 1,
+          info: 2,
+          error: 3,
+      };
+      this.log_level = 1;
+  }
+  // not use.
+  log(msg, obj=this, level='debug'){
+      let logmsg = '';
+      logmsg += '[' + level;
+      logmsg += ' ' + obj.constructor.name + '] ';
+      logmsg += msg;
+      if(this.level_no[level] >= this.log_level){
+          console.log(logmsg);
+      }
+  }
+  debug(msg, obj=this){
+    this.log(msg, obj=this, 'debug');
+  }
+  info(msg, obj=this){
+      this.log(msg, obj=this, 'info');
+  }
+  error(msg){
+      this.log(msg, obj=this, 'error');
+  }
+  // classlog(msg, class_name='Object', obj=this, level='debug'){
+  //     if(obj.constructor.name == class_name){
+  //         this.log(msg, obj, level);
+  //     }
+  // }
+}
+const logger = new loggerClass;
+
+// ### ---
 
 class GameObject{
     constructor(obj={}){
