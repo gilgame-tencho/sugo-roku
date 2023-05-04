@@ -1,5 +1,8 @@
-// Server config
+# Server config
 port: 3000
 
-// Game base config
+loglevel: debug
+debug_process: true
+
+# Game base config
 FPS: 30

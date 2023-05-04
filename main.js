@@ -7,10 +7,11 @@ const socketIO = require('socket.io');
 const app = express();
 const server = http.Server(app);
 const io = socketIO(server);
+const fs = require('fs');
 const yaml = require('yaml');
 
 // ### system param, common methods ###
-const server_conf = yaml.parse(fs.readFileSync(__dirname + '/mydb/server_conf.yml', 'utf-8'));
+const server_conf = yaml.parse(fs.readFileSync(__dirname + '/conf/server_conf.yml', 'utf-8'));
 
 const FIELD_WIDTH = 1000, FIELD_HEIGHT = 1000;
 
@@ -21,26 +22,27 @@ class loggerClass{
           info: 2,
           error: 3,
       };
-      this.log_level = 1;
+      this.log_level = this.level_no[server_conf.loglevel];
+      this.iam = obj.name;
   }
   // not use.
-  log(msg, obj=this, level='debug'){
+  log(msg, level='debug'){
       let logmsg = '';
       logmsg += '[' + level;
-      logmsg += ' ' + obj.constructor.name + '] ';
+      logmsg += ' ' + this.iam + '] ';
       logmsg += msg;
       if(this.level_no[level] >= this.log_level){
           console.log(logmsg);
       }
   }
-  debug(msg, obj=this){
-    this.log(msg, obj=this, 'debug');
+  debug(msg){
+    this.log(msg, 'debug');
   }
-  info(msg, obj=this){
-      this.log(msg, obj=this, 'info');
+  info(msg){
+      this.log(msg, 'info');
   }
   error(msg){
-      this.log(msg, obj=this, 'error');
+      this.log(msg, 'error');
   }
   // classlog(msg, class_name='Object', obj=this, level='debug'){
   //     if(obj.constructor.name == class_name){
@@ -48,7 +50,7 @@ class loggerClass{
   //     }
   // }
 }
-const logger = new loggerClass;
+const logger = new loggerClass({name: this.constructor.name});
 
 // ### ---
 
@@ -61,6 +63,8 @@ class GameObject{
         this.height = obj.height;
         this.angle = obj.angle;
         this.direction = obj.direction;
+
+        this.logger = new loggerClass({name: this.constructor.name});
     }
     move(distance){
         const oldX = this.x, oldY = this.y;
@@ -120,13 +124,13 @@ class Player extends GameObject{
         this.player_type = 'player';
 
         do{
-            console.log('init player!'+ Math.random());
+            this.logger.debug('init player!'+ Math.random());
             this.x = Math.random() * (FIELD_WIDTH - this.width);
             this.y = Math.random() * (FIELD_HEIGHT - this.height);
             this.angle = 0;
             this.direction = 0;  // direction is right:0, left:1;
         }while(this.intersectWalls());
-        console.log('init player!'+ Math.random());
+        this.logger.debug('init player!'+ Math.random());
     }
     shoot(){
         if(Object.keys(this.bullets).length >= 3){
@@ -194,7 +198,7 @@ class BotPlayer extends Player{
         setTimeout(() => {
             const bot = new BotPlayer({nickname: this.nickname});
             players[bot.id] = bot;
-        }, 3000);
+        }, server_conf.port);
     }
 };
 class Wall extends GameObject{
@@ -293,12 +297,15 @@ setInterval(() => {
     io.sockets.emit('state', players, bullets, walls);
 }, 1000/30);
 
-setInterval(() => {
-    // debug.
+if(server_conf.debug_process) {
+  let logh = "[Debug Process] ";
+  setInterval(() => {
     Object.values(players).forEach((player) => {
-        // console.log("ID:" + player.id + "\tType:" + player.player_type);
+        // logger.debug(logh + "ID:" + player.id + "\tType:" + player.player_type);
+        logger.debug(logh + `ID:${player.id}\tType:${player.player_type}`);
     });
-}, 1000*5);
+  }, 1000*5);
+}
 
 
 // Server config. -----------
@@ -309,5 +316,5 @@ app.get('/', (request, response) => {
 });
 
 server.listen(3000, function() {
-  console.log('Starting server on port 3000');
+  logger.info('Starting server on port 3000');
 });
