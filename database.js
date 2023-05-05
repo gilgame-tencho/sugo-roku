@@ -50,6 +50,90 @@ class loggerClass{
 }
 const logger = new loggerClass({name: this.constructor.name});
 
+// common functions.
+function random(range){
+  return Math.round(Math.random() * range * 10, 0) % range;
+}
+
+async function sleep(msg, wait=500){
+  await new Promise(resolve => setTimeout(() => {
+    if (msg) logger.info(msg);
+    resolve();
+  }, wait));
+}
+
+class LevelDB{
+  constructor(obj={}){
+    this.db_name = 'please name.';
+    this.mydb = {};
+    this.logger = new loggerClass({name: this.constructor.name});
+  }
+}
+
+class Hoges extends LevelDB{
+  constructor(obj={}){
+    super(obj);
+    // this.db_name = 'names';
+    // this.mydb = leveldb.names;
+  }
+  async init(){}
+  async getAll(){}
+}
+
+class Names extends LevelDB{
+  constructor(obj={}){
+    super(obj);
+    this.db_name = 'names';
+    this.mydb = leveldb.names;
+  }
+  async init(){
+    const names = fs.readFileSync(__dirname + '/database/names.tsv', 'utf-8');
+    logger.info('start init.');
+    let names_data = [];
+    names.split('\r\n').forEach((raw) => {
+        let raw_data = raw.split('\t');
+        names_data.push(raw_data);
+    });
+    for(let i=0; i<names_data.length; i++){
+        let name = names_data[i];
+        let icon;
+        if(name[0] === 'Male'){
+            icon = 'f' + (random(3) * 2 + 1);
+        }else{
+            icon = 'f' + (random(3) * 2 + 2);
+        }
+        await leveldb.names.put(name[1], {
+            gender: name[0],
+            name: {
+                en: name[1],
+                ja: name[2],
+            },
+            icon: icon,
+            level: 1,
+            guideline: {
+                radian: -135,
+                angle: -135 / 360 * 2 * Math.PI,
+            },
+            class: 'soldier',
+            class_status: {},
+            ex: 0,
+            nex: 100,
+            action: 'wait',
+        });
+    };
+    logger.info('end init.');
+  }
+  async getAll(){
+    let result = await leveldb.names.iterator({}).all();
+    logger.debug(result);
+    return result;
+  }
+}
+
+// init class objects...
+const names = new Names();
+const hoges = new Hoges();
+
 class Size{
   constructor(obj={}){
     this.size = 1.0;
@@ -110,11 +194,32 @@ async function app1(){
   logger.info('End app1');
 }
 
+function init(){
+  names.init();
+  hoges.init();
+}
+
+function show(){
+  names.getAll();
+  hoges.getAll();
+}
 
 app.get('/', (request, response) => {
   app1();
   response.send('Sample REST API');
-  logger.info('Called sample');
+  logger.info('Called get sample');
+});
+
+app.get('/names/all', (request, response) => {
+  show();
+  response.send('Sample REST API');
+  logger.info('Called get names');
+});
+
+app.get('/init', (request, response) => {
+  init();
+  response.send('Sample REST API');
+  logger.info('Called get init');
 });
 
 server.listen(server_conf.apl_db, function() {
