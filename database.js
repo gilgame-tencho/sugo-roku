@@ -9,19 +9,24 @@ const server = http.Server(app);
 const io = socketIO(server);
 const fs = require('fs');
 const yaml = require('yaml');
+const { Level } = require('level');
+
+const leveldb = {
+    names: new Level(__dirname + '/database/names', { valueEncoding: 'json' }),
+}
 
 // ### system param, common methods ###
 const server_conf = yaml.parse(fs.readFileSync(__dirname + '/conf/server_conf.yml', 'utf-8'));
 
 class loggerClass{
   constructor(obj={}){
-      this.level_no = {
-          debug: 1,
-          info: 2,
-          error: 3,
-      };
-      this.log_level = this.level_no[server_conf.loglevel];
-      this.iam = obj.name;
+    this.level_no = {
+      debug: 1,
+      info: 2,
+      error: 3,
+    };
+    this.log_level = this.level_no[server_conf.loglevel];
+    this.iam = obj.name;
   }
   // not use.
   log(msg, level='debug'){
@@ -48,7 +53,8 @@ const logger = new loggerClass({name: this.constructor.name});
 // Server config. -----------
 
 app.get('/', (request, response) => {
-    response.send('Sample REST API');
+  response.send('Sample REST API');
+  logger.info('Called sample');
 });
 
 server.listen(server_conf.apl_db, function() {
