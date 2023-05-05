@@ -85,6 +85,7 @@ class Names extends LevelDB{
     super(obj);
     this.db_name = 'names';
     this.mydb = leveldb.names;
+    this.loaded = false;
   }
   async init(){
     const names = fs.readFileSync(__dirname + '/database/names.tsv', 'utf-8');
@@ -123,10 +124,26 @@ class Names extends LevelDB{
     };
     logger.info('end init.');
   }
+  async load(){
+    if( !this.loaded ){
+      this.logger.info("Load go.");
+      this.list = await leveldb.names.iterator({}).all();
+      await sleep();
+      this.logger.info(`Loaded list length: ${this.list.length}`);
+      this.loaded = true;
+    }
+  }
   async getAll(){
-    let result = await leveldb.names.iterator({}).all();
+    await this.load();
+    let result = this.list;
     logger.debug(result);
     return result;
+  }
+  async gacha(){
+    await this.load();
+    let rs = random(this.list.length);
+    this.logger.debug(this.list[rs]);
+    return this.list[rs];
   }
 }
 
@@ -204,20 +221,39 @@ function show(){
   hoges.getAll();
 }
 
+async function rand(size=1){
+  let res = [];
+  for(let i=0; i<size; i++){
+    // ... format. realy?
+    let levelres = await names.gacha();
+    let jsondata = {};
+    jsondata[levelres[0]] = levelres[1];
+    res.push(jsondata);
+  }
+  return res;
+}
+
 app.get('/', (request, response) => {
   app1();
   response.send('Sample REST API');
   logger.info('Called get sample');
 });
 
-app.get('/names/all', (request, response) => {
-  show();
+app.get('/names/all', async (request, response) => {
+  await show();
   response.send('Sample REST API');
   logger.info('Called get names');
 });
 
-app.get('/init', (request, response) => {
-  init();
+app.get('/names/rand', async (request, response) => {
+  let size = 1;
+  if(request.query.size) size = request.query.size;
+  response.send(await rand(size));
+  logger.info('Called get rand');
+});
+
+app.get('/init', async (request, response) => {
+  await init();
   response.send('Sample REST API');
   logger.info('Called get init');
 });
