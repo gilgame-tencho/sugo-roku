@@ -247,8 +247,8 @@ io.on('connection', function(socket) {
     });
 });
 
-const move_score = 10;
-const angle_score = 0.2;
+const move_score = server_conf.move_score;
+const angle_score = server_conf.angle_score;
 setInterval(() => {
     Object.values(players).forEach((player) => {
         const movement = player.movement;
@@ -311,6 +311,6 @@ app.get('/', (request, response) => {
   response.sendFile(path.join(__dirname, '/static/index.html'));
 });
 
-server.listen(3000, function() {
-  logger.info('Starting server on port 3000');
+server.listen(server_conf.port, function() {
+  logger.info(`Starting server on port ${server_conf.port}`);
 });
