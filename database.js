@@ -50,9 +50,69 @@ class loggerClass{
 }
 const logger = new loggerClass({name: this.constructor.name});
 
-// Server config. -----------
+class Size{
+  constructor(obj={}){
+    this.size = 1.0;
+  }
+}
+
+function math1(sub){
+  let obj_a = [];
+  let result = sub;
+  let max = 100;
+  for(let i=0; i<max; i++){
+    obj_a.push(new Size());
+  }
+  obj_a.forEach(element => {
+    result += element.size;
+  });
+  logger.info(`math1 result:${result}`);
+  return result;
+}
+
+async function func1(ta, wait=500){
+  await new Promise(resolve => setTimeout(() => {
+    ta = 'Timer after';
+    logger.info('Set Timer');
+    resolve();
+  }, wait));
+  return ta;
+}
+
+async function func2(param, wait=500){
+  await new Promise(resolve => setTimeout(() => {
+    logger.info(param);
+    resolve();
+  }, wait));
+  return param;
+}
+
+async function app1(){
+  logger.info('Start app1');
+  let ta = 'before';
+  // ta = fs.readFile(__dirname + '/conf/server_conf.yml');
+  let abc = 1;
+
+  ta = await func1(ta);
+  let call = [1,2,3];
+  // forEach is no async.
+  await call.forEach(async ele =>{
+    await func2(ele, 1000);
+  });
+  let call2 = [4,5,6];
+  // try for apglizm. if want to wait. 
+  for(let i=0; i<call2.length; i++){
+    await func2(call2[i], 250);
+  }
+  abc = math1(abc);
+
+  logger.info(`[app1] ta:${ta}, abc:${abc}`);
+  logger.info('End app1');
+}
+
 
 app.get('/', (request, response) => {
+  app1();
   response.send('Sample REST API');
   logger.info('Called sample');
 });
