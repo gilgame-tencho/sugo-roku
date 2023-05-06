@@ -17,6 +17,7 @@ const leveldb = {
 
 // ### system param, common methods ###
 const server_conf = yaml.parse(fs.readFileSync(__dirname + '/conf/server_conf.yml', 'utf-8'));
+const SERVER_NAME = 'database';
 
 class loggerClass{
   constructor(obj={}){
@@ -31,8 +32,8 @@ class loggerClass{
   // not use.
   log(msg, level='debug'){
       let logmsg = '';
-      logmsg += '[' + level;
-      logmsg += ' ' + this.iam + '] ';
+      logmsg += `[${SERVER_NAME}] `;
+      logmsg += `[${level} ${this.iam}] `;
       logmsg += msg;
       if(this.level_no[level] >= this.log_level){
           console.log(logmsg);
@@ -250,6 +251,12 @@ app.get('/names/rand', async (request, response) => {
   if(request.query.size) size = request.query.size;
   response.send(await rand(size));
   logger.info('Called get rand');
+});
+
+app.get('/names/get/:name', async (request, response) => {
+  let name = request.params.name;
+  response.send(await rand());
+  logger.info('Called get name');
 });
 
 app.get('/init', async (request, response) => {

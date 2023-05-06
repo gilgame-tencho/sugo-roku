@@ -13,6 +13,7 @@ const yaml = require('yaml');
 // ### system param, common methods ###
 const server_conf = yaml.parse(fs.readFileSync(__dirname + '/conf/server_conf.yml', 'utf-8'));
 
+const SERVER_NAME = 'main';
 const FIELD_WIDTH = server_conf.FIELD_WIDTH;
 const FIELD_HEIGHT = server_conf.FIELD_HEIGHT;
 const FPS = server_conf.FPS;
@@ -30,8 +31,8 @@ class loggerClass{
   // not use.
   log(msg, level='debug'){
       let logmsg = '';
-      logmsg += '[' + level;
-      logmsg += ' ' + this.iam + '] ';
+      logmsg += `[${SERVER_NAME}] `;
+      logmsg += `[${level} ${this.iam}] `;
       logmsg += msg;
       if(this.level_no[level] >= this.log_level){
           console.log(logmsg);
