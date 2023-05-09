@@ -207,19 +207,19 @@ let players = {};
 let bullets = {};
 let walls = {};
 
-for(let i=0; i<3; i++){
-    const wall = new Wall({
-            x: Math.random() * FIELD_WIDTH,
-            y: Math.random() * FIELD_HEIGHT,
-            width: 200,
-            height: 50,
-    });
-    walls[wall.id] = wall;
-}
+// for(let i=0; i<3; i++){
+//     const wall = new Wall({
+//             x: Math.random() * FIELD_WIDTH,
+//             y: Math.random() * FIELD_HEIGHT,
+//             width: 200,
+//             height: 50,
+//     });
+//     walls[wall.id] = wall;
+// }
 
 let bots = {};
 for(let i=0; i<1; i++){
-    const bot = new BotPlayer({nickname: 'ソルジャー'+(i+1)});
+    const bot = new BotPlayer({nickname: 'soldir'+(i+1)});
     players[bot.id] = bot;
     bots[bot.id] = bot;
 }
