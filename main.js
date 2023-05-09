@@ -50,6 +50,32 @@ class loggerClass{
 }
 const logger = new loggerClass({name: this.constructor.name});
 
+class dataBaseClass{
+    constructor(obj={}){
+        this.url_base = obj.url_base;
+        this.table = 'names'
+    }
+    get(url){
+        let data = [];
+        http.get(url, function(res){
+            logger.debug('call get');
+            res.on('data', (chunk) => { data.push(chunk) }).on('end', () => {
+                let events = JSON.parse(Buffer.concat(data));
+                logger.debug(events[0]);
+                console.log(events[0]);
+                return events;
+            })
+        });
+    }
+    get_rand(){
+        this.get(`${this.url_base}${this.table}/rand`);
+    }
+}
+const database_param = {
+    url_base: 'http://localhost:3001/',
+}
+const database = new dataBaseClass(database_param);
+
 // ### ---
 
 class GameObject{
@@ -207,16 +233,6 @@ let players = {};
 let bullets = {};
 let walls = {};
 
-// for(let i=0; i<3; i++){
-//     const wall = new Wall({
-//             x: Math.random() * FIELD_WIDTH,
-//             y: Math.random() * FIELD_HEIGHT,
-//             width: 200,
-//             height: 50,
-//     });
-//     walls[wall.id] = wall;
-// }
-
 let bots = {};
 for(let i=0; i<1; i++){
     const bot = new BotPlayer({nickname: 'soldir'+(i+1)});
@@ -298,6 +314,9 @@ setInterval(() => {
 if(server_conf.debug_process) {
   let logh = "[Debug Process] ";
   setInterval(() => {
+
+    database.get_rand();
+
     Object.values(players).forEach((player) => {
         logger.debug(logh + `ID:${player.id}\tType:${player.player_type}`);
     });
