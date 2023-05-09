@@ -2,7 +2,9 @@
 
 const socket = io();
 const canvas = $('#canvas-2d')[0];
+const canvas_bk = $('#canvas-2d-back')[0];
 const context = canvas.getContext('2d');
+const context_bk = canvas_bk.getContext('2d');
 const playerImage = $('#player-image')[0];
 const botImage = $('#bot-image')[0];
 
@@ -58,6 +60,12 @@ $(document).on('keydown keyup', (event) => {
 });
 
 socket.on('state', function(players, bullets, walls) {
+    context_bk.clearRect(0, 0, canvas.width, canvas.height);
+    context_bk.lineWidth = 10;
+    context_bk.beginPath();
+    context_bk.rect(200, 200, canvas.width - 400, canvas.height - 400);
+    context_bk.stroke();
+
     context.clearRect(0, 0, canvas.width, canvas.height);
 
     context.lineWidth = 10;
