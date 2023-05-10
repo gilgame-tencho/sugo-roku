@@ -7,8 +7,22 @@ const canvas_bk = $('#canvas-back')[0];
 const ctt_ft = canvas_ft.getContext('2d');
 const ctt_md = canvas_md.getContext('2d');
 const ctt_bk = canvas_bk.getContext('2d');
-const playerImage = $('#player-image')[0];
-const botImage = $('#bot-image')[0];
+
+const images = {};
+images.player = $('#player-image')[0];
+images.bot = $('#bot-image')[0];
+images.bg = {
+    feald: $('#map')[0],
+}
+images.step = {
+    normal: $('#step-normal')[0],
+}
+images.coin = {
+    1: $('#coin-1')[0],
+    2: $('#coin-2')[0],
+    3: $('#coin-3')[0],
+    4: $('#coin-4')[0],
+}
 
 function gameStart(){
     socket.emit('game-start', {nickname: $("#nickname").val() });
@@ -74,10 +88,11 @@ function drawImage(ctt, img, px, py=null, pw=null, ph=null){
     );
 }
 function view_back(){
-    ctt_bk.clearRect(0, 0, canvas_ft.width, canvas_ft.height);
+    ctt_bk.clearRect(0, 0, canvas_bk.width, canvas_bk.height);
+    drawImage(ctt_bk, images.bg.feald, 0, 0, canvas_bk.width, canvas_bk.height)
     ctt_bk.lineWidth = 10;
     ctt_bk.beginPath();
-    ctt_bk.rect(200, 200, canvas_ft.width - 400, canvas_ft.height - 400);
+    ctt_bk.rect(200, 200, canvas_bk.width - 400, canvas_bk.height - 400);
     ctt_bk.stroke();
 }
 
@@ -110,9 +125,9 @@ socket.on('state', function(ccdm) {
         ctt_ft.translate(player.x + player.width/2, player.y + player.height/2);
         ctt_ft.rotate(player.angle);
         if(player.player_type === 'player'){
-            drawImage(ctt_ft, playerImage, -player.width/2, -player.height/2, player.width, player.height);
+            drawImage(ctt_ft, images.player, -player.width/2, -player.height/2, player.width, player.height);
         }else if(player.player_type === 'bot'){
-            drawImage(ctt_ft, botImage, -player.width/2, -player.height/2, player.width, player.height);
+            drawImage(ctt_ft, images.bot, -player.width/2, -player.height/2, player.width, player.height);
         }else{
             // no drawImage.
         }
@@ -137,7 +152,7 @@ socket.on('state', function(ccdm) {
     });
     Object.values(ccdm.pieces).forEach((piece) => {
         ctt_ft.save();
-        drawImage(ctt_ft, playerImage, piece);
+        drawImage(ctt_ft, images.player, piece);
         ctt_ft.restore();
     });
 });

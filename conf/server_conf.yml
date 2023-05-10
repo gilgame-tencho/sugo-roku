@@ -5,7 +5,7 @@ apl_db: 3001
 loglevel: debug
 debug_process: false
 
-FIELD_WIDTH: 1000
+FIELD_WIDTH: 1500
 FIELD_HEIGHT: 1000
 
 # Game base config
