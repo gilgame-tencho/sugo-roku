@@ -25,17 +25,14 @@ function keypress_ivent(e) {
 	document.getElementById('output').innerHTML = e.key;
 	return false; 
 }
-
 function keydown_ivent(e) {
 	document.getElementById('output').innerHTML = e.key;
 	return false; 
 }
-
 function keyup_ivent(e) {
 	document.getElementById('output').innerHTML = '　';
 	return false; 
 }
-
 
 $(document).on('keydown keyup', (event) => {
     const KeyToCommand = {
@@ -58,13 +55,21 @@ $(document).on('keydown keyup', (event) => {
     }
 });
 
-ctt_bk.clearRect(0, 0, canvas_ft.width, canvas_ft.height);
-ctt_bk.lineWidth = 10;
-ctt_bk.beginPath();
-ctt_bk.rect(200, 200, canvas_ft.width - 400, canvas_ft.height - 400);
-ctt_bk.stroke();
+function view_back(){
+    ctt_bk.clearRect(0, 0, canvas_ft.width, canvas_ft.height);
+    ctt_bk.lineWidth = 10;
+    ctt_bk.beginPath();
+    ctt_bk.rect(200, 200, canvas_ft.width - 400, canvas_ft.height - 400);
+    ctt_bk.stroke();
+}
+
+// init -----
+view_back();
+
+// ----------
 
 socket.on('back-frame', function(ccdm) {
+    view_back();
 });
 
 socket.on('state', function(ccdm) {
@@ -111,6 +116,17 @@ socket.on('state', function(ccdm) {
     Object.values(ccdm.walls).forEach((wall) => {
         ctt_ft.fillStyle = 'black';
         ctt_ft.fillRect(wall.x, wall.y, wall.width, wall.height);
+    });
+    Object.values(ccdm.pieces).forEach((piece) => {
+        ctt_ft.save();
+        // ctt_ft.translate(player.x, player.y);
+        ctt_ft.drawImage(
+            playerImage,
+            0, 0, playerImage.width, playerImage.height,
+            piece.x, piece.y, piece.width, piece.height
+        );
+        // ctt_ft.drawImage(playerImage, 0, 0, playerImage.width, playerImage.height, -piece.width/2, -piece.height/2, piece.width, piece.height);
+        ctt_ft.restore();
     });
 });
 

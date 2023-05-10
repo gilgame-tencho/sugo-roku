@@ -108,13 +108,40 @@ class CCDM extends ClientCommonDataManager{
 
 // ### ---
 
-class GameObject{
+class SugoGameMaster{
+    constructor(){
+        this.start();
+    }
+    start(){
+        let obj = {
+            x: 130, y:130, height:50, width:50
+        }
+        let piece = new Piece(obj);
+        ccdm.pieces[piece.id] = piece;
+    }
+}
+
+class OriginObject{
     constructor(obj={}){
         this.id = Math.floor(Math.random()*1000000000);
         this.x = obj.x;
         this.y = obj.y;
         this.width = obj.width;
         this.height = obj.height;
+    }
+    toJSON(){
+        return {
+            id: this.id,
+            x: this.x,
+            y: this.y,
+            width: this.width,
+            height: this.height,
+        };
+    }
+}
+class GameObject extends OriginObject{
+    constructor(obj={}){
+        super(obj);
         this.angle = obj.angle;
         this.direction = obj.direction;
 
@@ -257,9 +284,21 @@ class BotPlayer extends Player{
 };
 class Wall extends GameObject{
 };
+class Piece extends OriginObject{
+    constructor(obj={}){
+        super(obj);
+        this.point = obj.point;
+    }
+    toJSON(){
+        return Object.assign(super.toJSON(), {
+            point: this.point,
+        });
+    }
+}
 
 // init block. -----------------------------
 const ccdm = new CCDM();
+const sggm = new SugoGameMaster();
 
 for(let i=0; i<1; i++){
     let bot = new BotPlayer({nickname: 'soldir'+(i+1)});
@@ -350,7 +389,6 @@ if(server_conf.debug_process) {
     });
   }, 1000*5);
 }
-
 
 // Server config. -----------
 app.use('/static', express.static(__dirname + '/static'));
