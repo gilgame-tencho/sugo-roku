@@ -14,8 +14,9 @@
                 <button style="font-size: xx-large;" id="start-button">Start</button>
             </div>
         </div>
-        <canvas id="canvas-2d"      width="1000" height="1000" style="position:absolute;width:100%;height:100%;object-fit:contain;z-index: 5;"></canvas>
-        <canvas id="canvas-2d-back" width="1000" height="1000" style="position:absolute;width:100%;height:100%;object-fit:contain;z-index: 3;"></canvas>
+        <canvas id="canvas-front"  width="1000" height="1000" style="position:absolute;width:100%;height:100%;object-fit:contain;z-index: 5;"></canvas>
+        <canvas id="canvas-middle" width="1000" height="1000" style="position:absolute;width:100%;height:100%;object-fit:contain;z-index: 3;"></canvas>
+        <canvas id="canvas-back"   width="1000" height="1000" style="position:absolute;width:100%;height:100%;object-fit:contain;z-index: 1;"></canvas>
     </div>
     <img id="player-image" src="/static/images/charactor/wadordi.png" style="display: none;">
     <img id="bot-image" src="/static/images/charactor/scal.png" style="display: none;">
@@ -24,10 +25,6 @@
     <img id="coin-2" src="/static/images/dice/coin_2.png" style="display: none;">
     <img id="coin-3" src="/static/images/dice/coin_3.png" style="display: none;">
     <img id="coin-4" src="/static/images/dice/coin_4.png" style="display: none;">
-
-    <div class="debug_area" style="display:flex; height:50px">
-        <div style="font-size:18px; margin-right:5px;">debug area:</div><div id="output">　</div><div id="log" style="margin-left:80px"></div>
-    </div>
 
     <script src="/static/index.js"></script>
   </body>

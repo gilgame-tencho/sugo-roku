@@ -1,10 +1,12 @@
 'use strict';
 
 const socket = io();
-const canvas = $('#canvas-2d')[0];
-const canvas_bk = $('#canvas-2d-back')[0];
-const context = canvas.getContext('2d');
-const context_bk = canvas_bk.getContext('2d');
+const canvas_ft = $('#canvas-front')[0];
+const canvas_md = $('#canvas-middle')[0];
+const canvas_bk = $('#canvas-back')[0];
+const ctt_ft = canvas_ft.getContext('2d');
+const ctt_md = canvas_md.getContext('2d');
+const ctt_bk = canvas_bk.getContext('2d');
 const playerImage = $('#player-image')[0];
 const botImage = $('#bot-image')[0];
 
@@ -21,19 +23,16 @@ document.addEventListener('keyup', keyup_ivent);
 
 function keypress_ivent(e) {
 	document.getElementById('output').innerHTML = e.key;
-	document.getElementById('log').innerHTML = 'keypress';
 	return false; 
 }
 
 function keydown_ivent(e) {
 	document.getElementById('output').innerHTML = e.key;
-	document.getElementById('log').innerHTML = 'keydown';
 	return false; 
 }
 
 function keyup_ivent(e) {
 	document.getElementById('output').innerHTML = '　';
-	document.getElementById('log').innerHTML = 'keyup';
 	return false; 
 }
 
@@ -59,56 +58,56 @@ $(document).on('keydown keyup', (event) => {
     }
 });
 
+ctt_bk.clearRect(0, 0, canvas_ft.width, canvas_ft.height);
+ctt_bk.lineWidth = 10;
+ctt_bk.beginPath();
+ctt_bk.rect(200, 200, canvas_ft.width - 400, canvas_ft.height - 400);
+ctt_bk.stroke();
+
 socket.on('state', function(players, bullets, walls) {
-    context_bk.clearRect(0, 0, canvas.width, canvas.height);
-    context_bk.lineWidth = 10;
-    context_bk.beginPath();
-    context_bk.rect(200, 200, canvas.width - 400, canvas.height - 400);
-    context_bk.stroke();
+    ctt_ft.clearRect(0, 0, canvas_ft.width, canvas_ft.height);
 
-    context.clearRect(0, 0, canvas.width, canvas.height);
-
-    context.lineWidth = 10;
-    context.beginPath();
-    context.rect(0, 0, canvas.width, canvas.height);
-    context.stroke();
+    ctt_ft.lineWidth = 10;
+    ctt_ft.beginPath();
+    ctt_ft.rect(0, 0, canvas_ft.width, canvas_ft.height);
+    ctt_ft.stroke();
 
     Object.values(players).forEach((player) => {
-        context.save();
-        context.font = '20px Bold Arial';
-        context.fillText(player.nickname, player.x, player.y + player.height + 25);
-        context.font = '10px Bold Arial';
-        context.fillStyle = "gray";
-        context.fillText('♥'.repeat(player.maxHealth), player.x, player.y + player.height + 10);
-        context.fillStyle = "red";
-        context.fillText('♥'.repeat(player.health), player.x, player.y + player.height + 10);
-        context.translate(player.x + player.width/2, player.y + player.height/2);
-        context.rotate(player.angle);
+        ctt_ft.save();
+        ctt_ft.font = '20px Bold Arial';
+        ctt_ft.fillText(player.nickname, player.x, player.y + player.height + 25);
+        ctt_ft.font = '10px Bold Arial';
+        ctt_ft.fillStyle = "gray";
+        ctt_ft.fillText('♥'.repeat(player.maxHealth), player.x, player.y + player.height + 10);
+        ctt_ft.fillStyle = "red";
+        ctt_ft.fillText('♥'.repeat(player.health), player.x, player.y + player.height + 10);
+        ctt_ft.translate(player.x + player.width/2, player.y + player.height/2);
+        ctt_ft.rotate(player.angle);
         if(player.player_type === 'player'){
-            context.drawImage(playerImage, 0, 0, playerImage.width, playerImage.height, -player.width/2, -player.height/2, player.width, player.height);
+            ctt_ft.drawImage(playerImage, 0, 0, playerImage.width, playerImage.height, -player.width/2, -player.height/2, player.width, player.height);
         }else if(player.player_type === 'bot'){
-            context.drawImage(botImage, 0, 0, botImage.width, botImage.height, -player.width/2, -player.height/2, player.width, player.height);
+            ctt_ft.drawImage(botImage, 0, 0, botImage.width, botImage.height, -player.width/2, -player.height/2, player.width, player.height);
         }else{
             // no drawImage.
         }
-        context.restore();
+        ctt_ft.restore();
         
         if(player.socketId === socket.id){
-            context.save();
-            context.font = '30px Bold Arial';
-            context.fillText('You', player.x, player.y - 20);
-            context.fillText(player.point + ' point', 20, 40);
-            context.restore();
+            ctt_ft.save();
+            ctt_ft.font = '30px Bold Arial';
+            ctt_ft.fillText('You', player.x, player.y - 20);
+            ctt_ft.fillText(player.point + ' point', 20, 40);
+            ctt_ft.restore();
         }
     });
     Object.values(bullets).forEach((bullet) => {
-        context.beginPath();
-        context.arc(bullet.x, bullet.y, bullet.width/2, 0, 2 * Math.PI);
-        context.stroke();
+        ctt_ft.beginPath();
+        ctt_ft.arc(bullet.x, bullet.y, bullet.width/2, 0, 2 * Math.PI);
+        ctt_ft.stroke();
     });
     Object.values(walls).forEach((wall) => {
-        context.fillStyle = 'black';
-        context.fillRect(wall.x, wall.y, wall.width, wall.height);
+        ctt_ft.fillStyle = 'black';
+        ctt_ft.fillRect(wall.x, wall.y, wall.width, wall.height);
     });
 });
 
