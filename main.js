@@ -90,6 +90,7 @@ class CCDM extends ClientCommonDataManager{
     constructor(obj={}){
         super(obj);
         this.pieces = {};
+        this.steps = {};
         this.players = {};
         this.bots = {};
         this.bullets = {};
@@ -98,6 +99,7 @@ class CCDM extends ClientCommonDataManager{
     toJSON(){
         return Object.assign(super.toJSON(), {
             pieces: this.pieces,
+            steps: this.steps,
             players: this.players,
             bots: this.bots,
             bullets: this.bullets,
@@ -113,11 +115,27 @@ class SugoGameMaster{
         this.start();
     }
     start(){
+        let cnt = 40;
+        let x = 150;
+        let y = 150;
+        let retu = 8;
         let obj = {
-            x: 130, y:130, height:50, width:50
+            x: x + 100*0.5 - 50 * 0.5,
+            y: y + 100*0.5 - 50 * 0.5,
+            width:50,
+            height:50,
         }
         let piece = new Piece(obj);
         ccdm.pieces[piece.id] = piece;
+
+        obj.width = 100;
+        obj.height = 100;
+        for(let i=0;i<cnt;i++){
+            obj.x = x * (i % retu) + x;
+            obj.y = y * Math.floor(i / retu) + y;
+            let step = new Piece(obj);
+            ccdm.steps[step.id] = step;
+        }
     }
 }
 
@@ -377,6 +395,11 @@ setInterval(() => {
     });
     io.sockets.emit('state', ccdm);
 }, 1000/FPS);
+
+setInterval(() => {
+    logger.debug('back-frame refresh.');
+    io.sockets.emit('back-frame', ccdm);
+}, 1000/1*5);
 
 if(server_conf.debug_process) {
   let logh = "[Debug Process] ";

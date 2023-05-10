@@ -2,10 +2,10 @@
 
 const socket = io();
 const canvas_ft = $('#canvas-front')[0];
-const canvas_md = $('#canvas-middle')[0];
-const canvas_bk = $('#canvas-back')[0];
 const ctt_ft = canvas_ft.getContext('2d');
+const canvas_md = $('#canvas-middle')[0];
 const ctt_md = canvas_md.getContext('2d');
+const canvas_bk = $('#canvas-back')[0];
 const ctt_bk = canvas_bk.getContext('2d');
 
 const images = {};
@@ -31,23 +31,6 @@ function gameStart(){
 $("#start-button").on('click', gameStart);
 
 let movement = {};
-
-document.addEventListener('keypress', keypress_ivent);
-document.addEventListener('keyup', keyup_ivent);
-
-function keypress_ivent(e) {
-	document.getElementById('output').innerHTML = e.key;
-	return false; 
-}
-function keydown_ivent(e) {
-	document.getElementById('output').innerHTML = e.key;
-	return false; 
-}
-function keyup_ivent(e) {
-	document.getElementById('output').innerHTML = '　';
-	return false; 
-}
-
 $(document).on('keydown keyup', (event) => {
     const KeyToCommand = {
         'ArrowUp': 'forward',
@@ -89,11 +72,9 @@ function drawImage(ctt, img, px, py=null, pw=null, ph=null){
 }
 function view_back(){
     ctt_bk.clearRect(0, 0, canvas_bk.width, canvas_bk.height);
-    drawImage(ctt_bk, images.bg.feald, 0, 0, canvas_bk.width, canvas_bk.height)
-    ctt_bk.lineWidth = 10;
-    ctt_bk.beginPath();
-    ctt_bk.rect(0, 0, canvas_bk.width, canvas_bk.height);
-    ctt_bk.stroke();
+    // ctt_md.clearRect(0, 0, canvas_md.width, canvas_md.height);
+    drawImage(ctt_bk, images.bg.feald, 0, 0, canvas_bk.width, canvas_bk.height);
+
 }
 
 // init -----
@@ -103,6 +84,9 @@ view_back();
 
 socket.on('back-frame', function(ccdm) {
     view_back();
+    Object.values(ccdm.steps).forEach((step) => {
+        drawImage(ctt_bk, images.step.normal, step);
+    });
 });
 
 socket.on('state', function(ccdm) {
