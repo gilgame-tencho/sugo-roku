@@ -64,7 +64,10 @@ ctt_bk.beginPath();
 ctt_bk.rect(200, 200, canvas_ft.width - 400, canvas_ft.height - 400);
 ctt_bk.stroke();
 
-socket.on('state', function(players, bullets, walls) {
+socket.on('back-frame', function(ccdm) {
+});
+
+socket.on('state', function(ccdm) {
     ctt_ft.clearRect(0, 0, canvas_ft.width, canvas_ft.height);
 
     ctt_ft.lineWidth = 10;
@@ -72,7 +75,7 @@ socket.on('state', function(players, bullets, walls) {
     ctt_ft.rect(0, 0, canvas_ft.width, canvas_ft.height);
     ctt_ft.stroke();
 
-    Object.values(players).forEach((player) => {
+    Object.values(ccdm.players).forEach((player) => {
         ctt_ft.save();
         ctt_ft.font = '20px Bold Arial';
         ctt_ft.fillText(player.nickname, player.x, player.y + player.height + 25);
@@ -100,12 +103,12 @@ socket.on('state', function(players, bullets, walls) {
             ctt_ft.restore();
         }
     });
-    Object.values(bullets).forEach((bullet) => {
+    Object.values(ccdm.bullets).forEach((bullet) => {
         ctt_ft.beginPath();
         ctt_ft.arc(bullet.x, bullet.y, bullet.width/2, 0, 2 * Math.PI);
         ctt_ft.stroke();
     });
-    Object.values(walls).forEach((wall) => {
+    Object.values(ccdm.walls).forEach((wall) => {
         ctt_ft.fillStyle = 'black';
         ctt_ft.fillRect(wall.x, wall.y, wall.width, wall.height);
     });

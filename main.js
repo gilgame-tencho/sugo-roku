@@ -76,6 +76,36 @@ const database_param = {
 }
 const database = new dataBaseClass(database_param);
 
+class ClientCommonDataManager{
+    constructor(obj={}){
+        this.id = Math.floor(Math.random()*1000000000);
+    }
+    toJSON(){
+        return {
+            id: this.id,
+        };
+    }
+}
+class CCDM extends ClientCommonDataManager{
+    constructor(obj={}){
+        super(obj);
+        this.pieces = {};
+        this.players = {};
+        this.bots = {};
+        this.bullets = {};
+        this.walls = {};
+    }
+    toJSON(){
+        return Object.assign(super.toJSON(), {
+            pieces: this.pieces,
+            players: this.players,
+            bots: this.bots,
+            bullets: this.bullets,
+            walls: this.walls,
+        });
+    }
+}
+
 // ### ---
 
 class GameObject{
@@ -115,7 +145,7 @@ class GameObject{
             (this.y + this.height >= obj.y);
     }
     intersectWalls(){
-        return Object.values(walls).some((wall) => {
+        return Object.values(ccdm.walls).some((wall) => {
             if(this.intersect(wall)){
                 return true;
             }
@@ -164,11 +194,11 @@ class Player extends GameObject{
             x: this.x + this.width/2,
             y: this.y + this.height/2,
             angle: this.angle,
-            player: this,
+            character: this,
         });
         bullet.move(this.width/2);
         this.bullets[bullet.id] = bullet;
-        bullets[bullet.id] = bullet;
+        ccdm.bullets[bullet.id] = bullet;
     }
     damage(){
         this.health --;
@@ -196,11 +226,11 @@ class Bullet extends GameObject{
         super(obj);
         this.width = 15;
         this.height = 15;
-        this.player = obj.player;
+        this.character = obj.character;
     }
     remove(){
-        delete this.player.bullets[this.id];
-        delete bullets[this.id];
+        delete this.character.bullets[this.id];
+        delete ccdm.bullets[this.id];
     }
 };
 class BotPlayer extends Player{
@@ -229,15 +259,12 @@ class Wall extends GameObject{
 };
 
 // init block. -----------------------------
-let players = {};
-let bullets = {};
-let walls = {};
+const ccdm = new CCDM();
 
-let bots = {};
 for(let i=0; i<1; i++){
-    const bot = new BotPlayer({nickname: 'soldir'+(i+1)});
-    players[bot.id] = bot;
-    bots[bot.id] = bot;
+    let bot = new BotPlayer({nickname: 'soldir'+(i+1)});
+    // ccdm.players[bot.id] = bot;
+    ccdm.bots[bot.id] = bot;
 }
 
 io.on('connection', function(socket) {
@@ -247,7 +274,7 @@ io.on('connection', function(socket) {
             socketId: socket.id,
             nickname: config.nickname,
         });
-        players[player.id] = player;
+        ccdm.players[player.id] = player;
     });
     socket.on('movement', function(movement) {
         if(!player || player.health===0){return;}
@@ -259,7 +286,7 @@ io.on('connection', function(socket) {
     });
     socket.on('disconnect', () => {
         if(!player){return;}
-        delete players[player.id];
+        delete ccdm.players[player.id];
         player = null;
     });
 });
@@ -267,7 +294,8 @@ io.on('connection', function(socket) {
 const move_score = server_conf.move_score;
 const angle_score = server_conf.angle_score;
 setInterval(() => {
-    Object.values(players).forEach((player) => {
+    let characters = Object.assign(ccdm.players, ccdm.bots);
+    Object.values(ccdm.players).forEach((player) => {
         const movement = player.movement;
         if(movement.forward){
             player.move(move_score);
@@ -288,27 +316,27 @@ setInterval(() => {
             player.move(move_score);
         }
     });
-    Object.values(bullets).forEach((bullet) =>{
+    Object.values(ccdm.bullets).forEach((bullet) =>{
         if(! bullet.move(10)){
             bullet.remove();
             return;
         }
-        Object.values(players).forEach((player) => {
-           if(bullet.intersect(player)){
-               if(player !== bullet.player){
-                   player.damage();
+        Object.values(characters).forEach((character) => {
+           if(bullet.intersect(character)){
+               if(character !== bullet.character){
+                   character.damage();
                    bullet.remove();
-                   bullet.player.point += 1;
+                   bullet.character.point += 1;
                }
-           } 
+           }
         });
-        Object.values(walls).forEach((wall) => {
+        Object.values(ccdm.walls).forEach((wall) => {
            if(bullet.intersect(wall)){
                bullet.remove();
            }
         });
     });
-    io.sockets.emit('state', players, bullets, walls);
+    io.sockets.emit('state', ccdm);
 }, 1000/FPS);
 
 if(server_conf.debug_process) {
@@ -317,7 +345,7 @@ if(server_conf.debug_process) {
 
     database.get_rand();
 
-    Object.values(players).forEach((player) => {
+    Object.values(ccdm.players).forEach((player) => {
         logger.debug(logh + `ID:${player.id}\tType:${player.player_type}`);
     });
   }, 1000*5);
