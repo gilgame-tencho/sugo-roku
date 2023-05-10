@@ -92,7 +92,7 @@ function view_back(){
     drawImage(ctt_bk, images.bg.feald, 0, 0, canvas_bk.width, canvas_bk.height)
     ctt_bk.lineWidth = 10;
     ctt_bk.beginPath();
-    ctt_bk.rect(200, 200, canvas_bk.width - 400, canvas_bk.height - 400);
+    ctt_bk.rect(0, 0, canvas_bk.width, canvas_bk.height);
     ctt_bk.stroke();
 }
 
