@@ -55,6 +55,24 @@ $(document).on('keydown keyup', (event) => {
     }
 });
 
+function drawImage(ctt, img, px, py=null, pw=null, ph=null){
+    let x; let y; let w; let h;
+    if(py == null){
+        x = px.x; y = px.y;
+        w = px.width; h = px.height;
+    }else if(ph == null){
+        x = px; y = py;
+        w = pw.width; h = pw.height;
+    }else{
+        x = px; y = py;
+        w = pw; h = ph;
+    }
+    ctt.drawImage(
+        img,
+        0, 0, img.width, img.height,
+        x, y, w, h
+    );
+}
 function view_back(){
     ctt_bk.clearRect(0, 0, canvas_ft.width, canvas_ft.height);
     ctt_bk.lineWidth = 10;
@@ -92,9 +110,9 @@ socket.on('state', function(ccdm) {
         ctt_ft.translate(player.x + player.width/2, player.y + player.height/2);
         ctt_ft.rotate(player.angle);
         if(player.player_type === 'player'){
-            ctt_ft.drawImage(playerImage, 0, 0, playerImage.width, playerImage.height, -player.width/2, -player.height/2, player.width, player.height);
+            drawImage(ctt_ft, playerImage, -player.width/2, -player.height/2, player.width, player.height);
         }else if(player.player_type === 'bot'){
-            ctt_ft.drawImage(botImage, 0, 0, botImage.width, botImage.height, -player.width/2, -player.height/2, player.width, player.height);
+            drawImage(ctt_ft, botImage, -player.width/2, -player.height/2, player.width, player.height);
         }else{
             // no drawImage.
         }
@@ -119,13 +137,7 @@ socket.on('state', function(ccdm) {
     });
     Object.values(ccdm.pieces).forEach((piece) => {
         ctt_ft.save();
-        // ctt_ft.translate(player.x, player.y);
-        ctt_ft.drawImage(
-            playerImage,
-            0, 0, playerImage.width, playerImage.height,
-            piece.x, piece.y, piece.width, piece.height
-        );
-        // ctt_ft.drawImage(playerImage, 0, 0, playerImage.width, playerImage.height, -piece.width/2, -piece.height/2, piece.width, piece.height);
+        drawImage(ctt_ft, playerImage, piece);
         ctt_ft.restore();
     });
 });
