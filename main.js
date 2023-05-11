@@ -91,19 +91,25 @@ class CCDM extends ClientCommonDataManager{
         super(obj);
         this.pieces = {};
         this.steps = {};
+        this.start_step = null;
+        this.goal_step = null;
         this.players = {};
         this.bots = {};
         this.bullets = {};
         this.walls = {};
+        this.coin = null;
     }
     toJSON(){
         return Object.assign(super.toJSON(), {
             pieces: this.pieces,
             steps: this.steps,
+            start_step: this.start_step,
+            goal_step: this.goal_step,
             players: this.players,
             bots: this.bots,
             bullets: this.bullets,
             walls: this.walls,
+            coin: this.coin,
         });
     }
 }
@@ -126,16 +132,31 @@ class SugoGameMaster{
             height:50,
         }
         let piece = new Piece(obj);
-        ccdm.pieces[piece.id] = piece;
+
+        obj.y = obj.y - 50;
+        ccdm.coin = new Coin(obj);
 
         obj.width = 100;
         obj.height = 100;
+        let first_step = null;
+        let back = null;
         for(let i=0;i<cnt;i++){
             obj.x = x * (i % retu) + x;
             obj.y = y * Math.floor(i / retu) + y;
-            let step = new Piece(obj);
+            let step = new Step(obj);
             ccdm.steps[step.id] = step;
+            if(i==2){ first_step = step }
+            if(i==0){
+                ccdm.start_step = step.id;
+            }else{
+                ccdm.steps[back].next = step.id;
+                step.back = back;
+            }
+            if(i==cnt){ ccdm.goal_step = step.id }
+            back = step.id;
         }
+        piece.set_step(first_step);
+        ccdm.pieces[piece.id] = piece;
     }
 }
 
@@ -302,17 +323,64 @@ class BotPlayer extends Player{
 };
 class Wall extends GameObject{
 };
-class Piece extends OriginObject{
+class Step extends OriginObject{
     constructor(obj={}){
         super(obj);
-        this.point = obj.point;
+        this.next = obj.next;
+        this.back = obj.back;
     }
     toJSON(){
         return Object.assign(super.toJSON(), {
-            point: this.point,
+            next: this.next,
+            back: this.back,
         });
     }
 }
+class Piece extends OriginObject{
+    constructor(obj={}){
+        super(obj);
+        this.step = obj.step;
+    }
+    set_step(step){
+        this.step = step.id;
+        this.x = step.x + step.width/2 - this.width/2;
+        this.y = step.y + step.height/2 - this.height/2;
+    }
+    next_step(){
+        let next = ccdm.steps[this.step].next;
+        if(!next){ next = ccdm.start_step }
+        let next_step = ccdm.steps[next];
+        this.set_step(next_step);
+    }
+    toJSON(){
+        return Object.assign(super.toJSON(), {
+            step: this.step,
+        });
+    }
+}
+class Coin extends OriginObject{
+    constructor(obj={}){
+        super(obj);
+        this.choices = {
+            c1: 1,
+            c2: 2,
+            c3: 3,
+            c4: 4,
+        };
+        this.state = this.choices.c1;
+    }
+    roll(){
+        let c = Math.floor(Math.random() * 4);
+        return this.choices[`c${c}`];
+    }
+    toJSON(){
+        return Object.assign(super.toJSON(), {
+            choices: this.choices,
+            state: this.state,
+        });
+    }
+}
+
 
 // init block. -----------------------------
 const ccdm = new CCDM();
@@ -400,6 +468,13 @@ setInterval(() => {
     logger.debug('back-frame refresh.');
     io.sockets.emit('back-frame', ccdm);
 }, 1000/1*5);
+
+setInterval(() => {
+    logger.debug('walk.');
+    Object.values(ccdm.pieces).forEach((piece) => {
+        piece.next_step();
+    });
+}, 1000/1*3);
 
 if(server_conf.debug_process) {
   let logh = "[Debug Process] ";
