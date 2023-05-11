@@ -95,6 +95,7 @@ class CCDM extends ClientCommonDataManager{
         this.bots = {};
         this.bullets = {};
         this.walls = {};
+        this.coin = null;
     }
     toJSON(){
         return Object.assign(super.toJSON(), {
@@ -104,6 +105,7 @@ class CCDM extends ClientCommonDataManager{
             bots: this.bots,
             bullets: this.bullets,
             walls: this.walls,
+            coin: this.coin,
         });
     }
 }
@@ -127,6 +129,9 @@ class SugoGameMaster{
         }
         let piece = new Piece(obj);
         ccdm.pieces[piece.id] = piece;
+
+        obj.y = obj.y - 50;
+        ccdm.coin = new Coin(obj);
 
         obj.width = 100;
         obj.height = 100;
@@ -313,6 +318,29 @@ class Piece extends OriginObject{
         });
     }
 }
+class Coin extends OriginObject{
+    constructor(obj={}){
+        super(obj);
+        this.choices = {
+            c1: 1,
+            c2: 2,
+            c3: 3,
+            c4: 4,
+        };
+        this.state = this.choices.c1;
+    }
+    roll(){
+        let c = Math.floor(Math.random() * 4);
+        return this.choices[`c${c}`];
+    }
+    toJSON(){
+        return Object.assign(super.toJSON(), {
+            choices: this.choices,
+            state: this.state,
+        });
+    }
+}
+
 
 // init block. -----------------------------
 const ccdm = new CCDM();

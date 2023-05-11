@@ -18,10 +18,10 @@ images.step = {
     normal: $('#step-normal')[0],
 }
 images.coin = {
-    1: $('#coin-1')[0],
-    2: $('#coin-2')[0],
-    3: $('#coin-3')[0],
-    4: $('#coin-4')[0],
+    c1: $('#coin-1')[0],
+    c2: $('#coin-2')[0],
+    c3: $('#coin-3')[0],
+    c4: $('#coin-4')[0],
 }
 
 function gameStart(){
@@ -139,6 +139,9 @@ socket.on('state', function(ccdm) {
         drawImage(ctt_ft, images.player, piece);
         ctt_ft.restore();
     });
+    // ccdm.coin
+    drawImage(ctt_ft, images.coin.c1, ccdm.coin);
+
 });
 
 socket.on('dead', () => {
