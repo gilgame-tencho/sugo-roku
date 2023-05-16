@@ -345,6 +345,7 @@ class BotPiece extends Piece{
         super(obj);
         this.action_state = obj.action_state ? obj.action_state : 'def';
         this.timer = this.stand_alone();
+        this.face = obj.face ? obj.face : 'type1';
     }
     stand_alone(){
         return setInterval(() => {
@@ -360,6 +361,7 @@ class BotPiece extends Piece{
     toJSON(){
         return Object.assign(super.toJSON(), {
             action_state: this.action_state,
+            face: this.face,
         });
     }
 }
@@ -482,12 +484,28 @@ setInterval(() => {
     io.sockets.emit('back-frame', ccdm);
 }, 1000/1*5);
 
-// setInterval(() => {
-//     logger.debug('walk.');
-//     Object.values(ccdm.pieces).forEach((piece) => {
-//         piece.next_step();
-//     });
-// }, 1000/1*3);
+const faces = [
+    'type1',
+    'type2',
+    'type3',
+    'type4',
+]
+setInterval(() => {
+    logger.debug('born.');
+    let x = 150;
+    let y = 150;
+    let obj = {
+        x: x + 100*0.5 - 50 * 0.5,
+        y: y + 100*0.5 - 50 * 0.5,
+        width:50,
+        height:50,
+        face: faces[STANDERD.random(4)],
+    }
+    let piece = new BotPiece(obj);
+    let step = ccdm.steps[ccdm.start_step];
+    piece.set_step(step);
+    ccdm.pieces[piece.id] = piece;
+}, 1000/1*10);
 
 if(server_conf.debug_process) {
   let logh = "[Debug Process] ";
