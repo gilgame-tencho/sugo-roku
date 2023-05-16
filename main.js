@@ -109,7 +109,7 @@ class SugoGameMaster{
                 ccdm.steps[back].next = step.id;
                 step.back = back;
             }
-            if(i==cnt){ ccdm.goal_step = step.id }
+            if(i== cnt - 1){ ccdm.goal_step = step.id }
             back = step.id;
         }
         piece.set_step(first_step);
@@ -350,13 +350,25 @@ class BotPiece extends Piece{
     stand_alone(){
         return setInterval(() => {
             this.action();
-        }, 1000 * 0.8);
+        }, 1000 * 0.3);
     }
     action(){
         let rand = STANDERD.random(3);
         if(rand == 1){
             this.next_step();
         }
+    }
+    next_step(){
+        if(this.step == ccdm.goal_step){
+            this.remove();
+        }else{
+            super.next_step();
+        }
+    }
+    remove(){
+        logger.log(`Delete: ${this.step}`);
+        clearInterval(this.timer);
+        delete ccdm.pieces[this.id];
     }
     toJSON(){
         return Object.assign(super.toJSON(), {
@@ -505,7 +517,7 @@ setInterval(() => {
     let step = ccdm.steps[ccdm.start_step];
     piece.set_step(step);
     ccdm.pieces[piece.id] = piece;
-}, 1000/1*10);
+}, 1000/1*5);
 
 if(server_conf.debug_process) {
   let logh = "[Debug Process] ";
