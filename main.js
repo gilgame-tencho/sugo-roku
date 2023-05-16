@@ -28,31 +28,10 @@ const logger = STANDERD.logger({
     name: this.constructor.name,
 });
 
-class dataBaseClass{
-    constructor(obj={}){
-        this.url_base = obj.url_base;
-        this.table = 'names'
-    }
-    get(url){
-        let data = [];
-        http.get(url, function(res){
-            logger.debug('call get');
-            res.on('data', (chunk) => { data.push(chunk) }).on('end', () => {
-                let events = JSON.parse(Buffer.concat(data));
-                logger.debug(events[0]);
-                console.log(events[0]);
-                return events;
-            })
-        });
-    }
-    get_rand(){
-        this.get(`${this.url_base}${this.table}/rand`);
-    }
-}
 const database_param = {
     url_base: 'http://localhost:3001/',
 }
-const database = new dataBaseClass(database_param);
+const database = DB.database(database_param);
 
 class ClientCommonDataManager{
     constructor(obj={}){
