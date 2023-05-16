@@ -34,3 +34,5 @@ class loggerClass{
   }
 }
 exports.logger = param => new loggerClass(param);
+
+exports.random = range => Math.round(Math.random() * range * 10, 0) % range;
