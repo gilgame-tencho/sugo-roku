@@ -135,7 +135,33 @@ class OriginObject{
         };
     }
 }
-class GameObject extends OriginObject{
+class PhysicsObject extends OriginObject{
+    constructor(obj={}){
+        super(obj);
+        this.x = obj.x;
+        this.y = obj.y;
+        this.width = obj.width;
+        this.height = obj.height;
+    }
+    toJSON(){
+        return Object.assign(super.toJSON(), {
+            x: this.x,
+            y: this.y,
+            width: this.width,
+            height: this.height,
+        });
+    }
+}
+class GeneralObject extends OriginObject{
+    constructor(obj={}){
+        super(obj);
+    }
+    toJSON(){
+        return Object.assign(super.toJSON(), {
+        });
+    }
+}
+class GameObject extends PhysicsObject{
     constructor(obj={}){
         super(obj);
         this.angle = obj.angle;
@@ -179,15 +205,10 @@ class GameObject extends OriginObject{
         });
     }
     toJSON(){
-        return {
-            id: this.id,
-            x: this.x,
-            y: this.y,
-            width: this.width,
-            height: this.height,
+        return Object.assign(super.toJSON(), {
             angle: this.angle,
             direction: this.direction
-        };
+        });
     }
 };
 
@@ -284,7 +305,7 @@ class BotPlayer extends Player{
 };
 class Wall extends GameObject{
 };
-class Step extends OriginObject{
+class Step extends PhysicsObject{
     constructor(obj={}){
         super(obj);
         this.next = obj.next;
@@ -297,7 +318,7 @@ class Step extends OriginObject{
         });
     }
 }
-class Piece extends OriginObject{
+class Piece extends PhysicsObject{
     constructor(obj={}){
         super(obj);
         this.step = obj.step;
@@ -319,7 +340,7 @@ class Piece extends OriginObject{
         });
     }
 }
-class Coin extends OriginObject{
+class Coin extends PhysicsObject{
     constructor(obj={}){
         super(obj);
         this.choices = {
@@ -341,7 +362,15 @@ class Coin extends OriginObject{
         });
     }
 }
-
+class Event extends GeneralObject{
+    constructor(obj={}){
+        super(obj);
+    }
+    toJSON(){
+        return Object.assign(super.toJSON(), {
+        });
+    }
+}
 
 // init block. -----------------------------
 const ccdm = new CCDM();
