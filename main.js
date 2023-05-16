@@ -88,7 +88,7 @@ class SugoGameMaster{
             width:50,
             height:50,
         }
-        let piece = new Piece(obj);
+        let piece = new BotPiece(obj);
 
         obj.y = obj.y - 50;
         ccdm.coin = new Coin(obj);
@@ -340,6 +340,29 @@ class Piece extends PhysicsObject{
         });
     }
 }
+class BotPiece extends Piece{
+    constructor(obj={}){
+        super(obj);
+        this.action_state = obj.action_state ? obj.action_state : 'def';
+        this.timer = this.stand_alone();
+    }
+    stand_alone(){
+        return setInterval(() => {
+            this.action();
+        }, 1000 * 0.8);
+    }
+    action(){
+        let rand = STANDERD.random(3);
+        if(rand == 1){
+            this.next_step();
+        }
+    }
+    toJSON(){
+        return Object.assign(super.toJSON(), {
+            action_state: this.action_state,
+        });
+    }
+}
 class Coin extends PhysicsObject{
     constructor(obj={}){
         super(obj);
@@ -459,12 +482,12 @@ setInterval(() => {
     io.sockets.emit('back-frame', ccdm);
 }, 1000/1*5);
 
-setInterval(() => {
-    logger.debug('walk.');
-    Object.values(ccdm.pieces).forEach((piece) => {
-        piece.next_step();
-    });
-}, 1000/1*3);
+// setInterval(() => {
+//     logger.debug('walk.');
+//     Object.values(ccdm.pieces).forEach((piece) => {
+//         piece.next_step();
+//     });
+// }, 1000/1*3);
 
 if(server_conf.debug_process) {
   let logh = "[Debug Process] ";
