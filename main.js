@@ -391,20 +391,32 @@ class Coin extends PhysicsObject{
             'c4',
         ];
         this.roll();
+        this.rolling_cool_time = server_conf.cool_time;
+
+        this.cool_timer = setInterval(()=>{
+            if(this.rolling_cool_time > 0){
+                this.rolling_cool_time = this.rolling_cool_time - FPS;
+            }
+        }, 1000/FPS);
         // this.timer = this.rolling();
-        this.logger.debug(`coin state: ${this.state}`);
+        // this.logger.debug(`coin state: ${this.state}`);
     }
     rolling(){
-        clearInterval(this.timer);
-        clearTimeout(this.roll_timer);
-        this.roll_timer = setTimeout(()=>{
+        if(this.rolling_cool_time > 0){
+            this.logger.debug('cool time it now.');
+            return 0;
+        }
+        clearInterval(this.loop_rolling);
+        clearTimeout(this.timer_rolling);
+        this.timer_rolling = setTimeout(()=>{
             this.logger.debug('coin clear timer.');
-            clearInterval(this.timer);
-        }, 800);
+            clearInterval(this.loop_rolling);
+        }, 1000);
         this.logger.debug('coin start timer.');
-        this.timer = setInterval(()=> {
+        this.loop_rolling = setInterval(()=> {
             this.roll();
         }, 1000/FPS);
+        this.rolling_cool_time = server_conf.cool_time;
     }
     roll(){
         let c = Math.floor(Math.random() * 4);
@@ -545,7 +557,7 @@ setInterval(() => {
     ccdm.pieces[piece.id] = piece;
 
     ccdm.coin.rolling();
-}, 1000/1*5);
+}, 1000/1*3);
 
 if(server_conf.debug_process) {
   let logh = "[Debug Process] ";
