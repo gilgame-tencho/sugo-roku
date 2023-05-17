@@ -146,7 +146,7 @@ socket.on('state', function(ccdm) {
         ctt_ft.restore();
     });
     // ccdm.coin
-    drawImage(ctt_ft, images.coin.c1, ccdm.coin);
+    drawImage(ctt_ft, images.coin[ccdm.coin.state], ccdm.coin);
 
 });
 

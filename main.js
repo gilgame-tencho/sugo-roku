@@ -120,10 +120,11 @@ class SugoGameMaster{
 class OriginObject{
     constructor(obj={}){
         this.id = Math.floor(Math.random()*1000000000);
-        this.x = obj.x;
-        this.y = obj.y;
-        this.width = obj.width;
-        this.height = obj.height;
+        this.logger = STANDERD.logger({
+            server_name: SERVER_NAME,
+            log_level: server_conf.loglevel,
+            name: this.constructor.name,
+        });
     }
     toJSON(){
         return {
@@ -169,11 +170,11 @@ class GameObject extends PhysicsObject{
         this.angle = obj.angle;
         this.direction = obj.direction;
 
-        this.logger = STANDERD.logger({
-            server_name: SERVER_NAME,
-            log_level: server_conf.loglevel,
-            name: this.constructor.name,
-        });
+        // this.logger = STANDERD.logger({
+        //     server_name: SERVER_NAME,
+        //     log_level: server_conf.loglevel,
+        //     name: this.constructor.name,
+        // });
     }
     move(distance){
         const oldX = this.x, oldY = this.y;
@@ -383,17 +384,31 @@ class BotPiece extends Piece{
 class Coin extends PhysicsObject{
     constructor(obj={}){
         super(obj);
-        this.choices = {
-            c1: 1,
-            c2: 2,
-            c3: 3,
-            c4: 4,
-        };
-        this.state = this.choices.c1;
+        this.choices = [
+            'c1',
+            'c2',
+            'c3',
+            'c4',
+        ];
+        this.roll();
+        // this.timer = this.rolling();
+        this.logger.debug(`coin state: ${this.state}`);
+    }
+    rolling(){
+        clearInterval(this.timer);
+        clearTimeout(this.roll_timer);
+        this.roll_timer = setTimeout(()=>{
+            this.logger.debug('coin clear timer.');
+            clearInterval(this.timer);
+        }, 800);
+        this.logger.debug('coin start timer.');
+        this.timer = setInterval(()=> {
+            this.roll();
+        }, 1000/FPS);
     }
     roll(){
         let c = Math.floor(Math.random() * 4);
-        return this.choices[`c${c}`];
+        this.state = this.choices[c];
     }
     toJSON(){
         return Object.assign(super.toJSON(), {
@@ -528,6 +543,8 @@ setInterval(() => {
     let step = ccdm.steps[ccdm.start_step];
     piece.set_step(step);
     ccdm.pieces[piece.id] = piece;
+
+    ccdm.coin.rolling();
 }, 1000/1*5);
 
 if(server_conf.debug_process) {
@@ -539,6 +556,8 @@ if(server_conf.debug_process) {
     Object.values(ccdm.players).forEach((player) => {
         logger.debug(logh + `ID:${player.id}\tType:${player.player_type}`);
     });
+
+    ccdm.coin.rolling();
   }, 1000*5);
 }
 
