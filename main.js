@@ -169,12 +169,6 @@ class GameObject extends PhysicsObject{
         super(obj);
         this.angle = obj.angle;
         this.direction = obj.direction;
-
-        // this.logger = STANDERD.logger({
-        //     server_name: SERVER_NAME,
-        //     log_level: server_conf.loglevel,
-        //     name: this.constructor.name,
-        // });
     }
     move(distance){
         const oldX = this.x, oldY = this.y;
@@ -313,7 +307,7 @@ class Step extends PhysicsObject{
         super(obj);
         this.next = obj.next;
         this.back = obj.back;
-        this.events = {};
+        this.events = [];
     }
     toJSON(){
         return Object.assign(super.toJSON(), {
