@@ -155,9 +155,11 @@ class PhysicsObject extends OriginObject{
 class GeneralObject extends OriginObject{
     constructor(obj={}){
         super(obj);
+        this.name = obj.name;
     }
     toJSON(){
         return Object.assign(super.toJSON(), {
+            name: this.name,
         });
     }
 }
@@ -310,6 +312,7 @@ class Step extends PhysicsObject{
         super(obj);
         this.next = obj.next;
         this.back = obj.back;
+        this.events = {};
     }
     toJSON(){
         return Object.assign(super.toJSON(), {
@@ -402,9 +405,17 @@ class Coin extends PhysicsObject{
 class Event extends GeneralObject{
     constructor(obj={}){
         super(obj);
+        this.description = obj.description;
+        this.event_action = obj.event_action;
+        this.phenomenon = obj.phenomenon;
+        this.probability = obj.probability ? obj.probability : 0.5;
     }
     toJSON(){
         return Object.assign(super.toJSON(), {
+            description: this.description,
+            event_action: this.event_action,
+            phenomenon: this.phenomenon,
+            probability: this.probability,
         });
     }
 }
