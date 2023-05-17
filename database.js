@@ -11,6 +11,9 @@ const fs = require('fs');
 const yaml = require('yaml');
 const { Level } = require('level');
 
+const STANDERD = require('./game_modules/standerd_modules.js');
+const DB = require('./game_modules/database_modules.js');
+
 const leveldb = {
     names: new Level(__dirname + '/database/names', { valueEncoding: 'json' }),
 }
@@ -19,37 +22,11 @@ const leveldb = {
 const server_conf = yaml.parse(fs.readFileSync(__dirname + '/conf/server_conf.yml', 'utf-8'));
 const SERVER_NAME = 'database';
 
-class loggerClass{
-  constructor(obj={}){
-    this.level_no = {
-      debug: 1,
-      info: 2,
-      error: 3,
-    };
-    this.log_level = this.level_no[server_conf.loglevel];
-    this.iam = obj.name;
-  }
-  // not use.
-  log(msg, level='debug'){
-      let logmsg = '';
-      logmsg += `[${SERVER_NAME}] `;
-      logmsg += `[${level} ${this.iam}] `;
-      logmsg += msg;
-      if(this.level_no[level] >= this.log_level){
-          console.log(logmsg);
-      }
-  }
-  debug(msg){
-    this.log(msg, 'debug');
-  }
-  info(msg){
-      this.log(msg, 'info');
-  }
-  error(msg){
-      this.log(msg, 'error');
-  }
-}
-const logger = new loggerClass({name: this.constructor.name});
+const logger = STANDERD.logger({
+  server_name: SERVER_NAME,
+  log_level: server_conf.loglevel,
+  name: this.constructor.name,
+});
 
 // common functions.
 function random(range){
@@ -67,7 +44,11 @@ class LevelDB{
   constructor(obj={}){
     this.db_name = 'please name.';
     this.mydb = {};
-    this.logger = new loggerClass({name: this.constructor.name});
+    this.logger = STANDERD.logger({
+      server_name: SERVER_NAME,
+      log_level: server_conf.loglevel,
+      name: this.constructor.name,
+    });
   }
 }
 
