@@ -109,7 +109,7 @@ class SugoGameMaster{
                 ccdm.steps[back].next = step.id;
                 step.back = back;
             }
-            if(i==cnt){ ccdm.goal_step = step.id }
+            if(i== cnt - 1){ ccdm.goal_step = step.id }
             back = step.id;
         }
         piece.set_step(first_step);
@@ -120,10 +120,11 @@ class SugoGameMaster{
 class OriginObject{
     constructor(obj={}){
         this.id = Math.floor(Math.random()*1000000000);
-        this.x = obj.x;
-        this.y = obj.y;
-        this.width = obj.width;
-        this.height = obj.height;
+        this.logger = STANDERD.logger({
+            server_name: SERVER_NAME,
+            log_level: server_conf.loglevel,
+            name: this.constructor.name,
+        });
     }
     toJSON(){
         return {
@@ -155,9 +156,11 @@ class PhysicsObject extends OriginObject{
 class GeneralObject extends OriginObject{
     constructor(obj={}){
         super(obj);
+        this.name = obj.name;
     }
     toJSON(){
         return Object.assign(super.toJSON(), {
+            name: this.name,
         });
     }
 }
@@ -167,11 +170,11 @@ class GameObject extends PhysicsObject{
         this.angle = obj.angle;
         this.direction = obj.direction;
 
-        this.logger = STANDERD.logger({
-            server_name: SERVER_NAME,
-            log_level: server_conf.loglevel,
-            name: this.constructor.name,
-        });
+        // this.logger = STANDERD.logger({
+        //     server_name: SERVER_NAME,
+        //     log_level: server_conf.loglevel,
+        //     name: this.constructor.name,
+        // });
     }
     move(distance){
         const oldX = this.x, oldY = this.y;
@@ -310,6 +313,7 @@ class Step extends PhysicsObject{
         super(obj);
         this.next = obj.next;
         this.back = obj.back;
+        this.events = {};
     }
     toJSON(){
         return Object.assign(super.toJSON(), {
@@ -345,11 +349,12 @@ class BotPiece extends Piece{
         super(obj);
         this.action_state = obj.action_state ? obj.action_state : 'def';
         this.timer = this.stand_alone();
+        this.face = obj.face ? obj.face : 'type1';
     }
     stand_alone(){
         return setInterval(() => {
             this.action();
-        }, 1000 * 0.8);
+        }, 1000 * 0.3);
     }
     action(){
         let rand = STANDERD.random(3);
@@ -357,26 +362,53 @@ class BotPiece extends Piece{
             this.next_step();
         }
     }
+    next_step(){
+        if(this.step == ccdm.goal_step){
+            this.remove();
+        }else{
+            super.next_step();
+        }
+    }
+    remove(){
+        logger.log(`Delete: ${this.step}`);
+        clearInterval(this.timer);
+        delete ccdm.pieces[this.id];
+    }
     toJSON(){
         return Object.assign(super.toJSON(), {
             action_state: this.action_state,
+            face: this.face,
         });
     }
 }
 class Coin extends PhysicsObject{
     constructor(obj={}){
         super(obj);
-        this.choices = {
-            c1: 1,
-            c2: 2,
-            c3: 3,
-            c4: 4,
-        };
-        this.state = this.choices.c1;
+        this.choices = [
+            'c1',
+            'c2',
+            'c3',
+            'c4',
+        ];
+        this.roll();
+        // this.timer = this.rolling();
+        this.logger.debug(`coin state: ${this.state}`);
+    }
+    rolling(){
+        clearInterval(this.timer);
+        clearTimeout(this.roll_timer);
+        this.roll_timer = setTimeout(()=>{
+            this.logger.debug('coin clear timer.');
+            clearInterval(this.timer);
+        }, 800);
+        this.logger.debug('coin start timer.');
+        this.timer = setInterval(()=> {
+            this.roll();
+        }, 1000/FPS);
     }
     roll(){
         let c = Math.floor(Math.random() * 4);
-        return this.choices[`c${c}`];
+        this.state = this.choices[c];
     }
     toJSON(){
         return Object.assign(super.toJSON(), {
@@ -388,9 +420,17 @@ class Coin extends PhysicsObject{
 class Event extends GeneralObject{
     constructor(obj={}){
         super(obj);
+        this.description = obj.description;
+        this.event_action = obj.event_action;
+        this.phenomenon = obj.phenomenon;
+        this.probability = obj.probability ? obj.probability : 0.5;
     }
     toJSON(){
         return Object.assign(super.toJSON(), {
+            description: this.description,
+            event_action: this.event_action,
+            phenomenon: this.phenomenon,
+            probability: this.probability,
         });
     }
 }
@@ -482,12 +522,30 @@ setInterval(() => {
     io.sockets.emit('back-frame', ccdm);
 }, 1000/1*5);
 
-// setInterval(() => {
-//     logger.debug('walk.');
-//     Object.values(ccdm.pieces).forEach((piece) => {
-//         piece.next_step();
-//     });
-// }, 1000/1*3);
+const faces = [
+    'type1',
+    'type2',
+    'type3',
+    'type4',
+]
+setInterval(() => {
+    logger.debug('born.');
+    let x = 150;
+    let y = 150;
+    let obj = {
+        x: x + 100*0.5 - 50 * 0.5,
+        y: y + 100*0.5 - 50 * 0.5,
+        width:50,
+        height:50,
+        face: faces[STANDERD.random(4)],
+    }
+    let piece = new BotPiece(obj);
+    let step = ccdm.steps[ccdm.start_step];
+    piece.set_step(step);
+    ccdm.pieces[piece.id] = piece;
+
+    ccdm.coin.rolling();
+}, 1000/1*5);
 
 if(server_conf.debug_process) {
   let logh = "[Debug Process] ";
@@ -498,6 +556,8 @@ if(server_conf.debug_process) {
     Object.values(ccdm.players).forEach((player) => {
         logger.debug(logh + `ID:${player.id}\tType:${player.player_type}`);
     });
+
+    ccdm.coin.rolling();
   }, 1000*5);
 }
 

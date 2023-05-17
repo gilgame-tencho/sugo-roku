@@ -11,6 +11,12 @@ const ctt_bk = canvas_bk.getContext('2d');
 const images = {};
 images.player = $('#player-image')[0];
 images.bot = $('#bot-image')[0];
+images.pieces = {
+    type1: $('#t1-image')[0],
+    type2: $('#t2-image')[0],
+    type3: $('#t3-image')[0],
+    type4: $('#t4-image')[0],
+}
 images.bg = {
     feald: $('#map')[0],
 }
@@ -136,11 +142,11 @@ socket.on('state', function(ccdm) {
     });
     Object.values(ccdm.pieces).forEach((piece) => {
         ctt_ft.save();
-        drawImage(ctt_ft, images.player, piece);
+        drawImage(ctt_ft, images.pieces[piece.face], piece);
         ctt_ft.restore();
     });
     // ccdm.coin
-    drawImage(ctt_ft, images.coin.c1, ccdm.coin);
+    drawImage(ctt_ft, images.coin[ccdm.coin.state], ccdm.coin);
 
 });
 
