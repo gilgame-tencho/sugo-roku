@@ -90,8 +90,10 @@ class SugoGameMaster{
         }
         let piece = new BotPiece(obj);
 
-        obj.y = obj.y - 50;
-        ccdm.coin = new Coin(obj);
+        let obj_coin = Object.assign({}, obj);
+        obj_coin.x = 50;
+        obj_coin.y = 50;
+        ccdm.coin = new Coin(obj_coin);
 
         obj.width = 100;
         obj.height = 100;
@@ -320,11 +322,28 @@ class Piece extends PhysicsObject{
     constructor(obj={}){
         super(obj);
         this.step = obj.step;
+
+        // let item_obj = Object.assign(obj,{});
+        // item_obj.y = item_obj.y - 50;
+        this.item = {
+            coin: new Coin(),
+        }
+        this.get_item_param();
+    }
+    get_item_param(){
+        this.item.coin.set_prop({
+            x: this.x,
+            y: this.y - 50,
+            width: this.width,
+            height: this.height,
+            item: this.item.coin,
+        });
     }
     set_step(step){
         this.step = step.id;
         this.x = step.x + step.width/2 - this.width/2;
         this.y = step.y + step.height/2 - this.height/2;
+        this.get_item_param();
     }
     next_step(){
         let next = ccdm.steps[this.step].next;
@@ -335,6 +354,7 @@ class Piece extends PhysicsObject{
     toJSON(){
         return Object.assign(super.toJSON(), {
             step: this.step,
+            item: this.item,
         });
     }
 }
@@ -415,6 +435,13 @@ class Coin extends PhysicsObject{
     roll(){
         let c = Math.floor(Math.random() * 4);
         this.state = this.choices[c];
+    }
+    set_prop(obj){
+        if(!obj){ return }
+        this.x = obj.x;
+        this.y = obj.y;
+        this.width = obj.width;
+        this.height = obj.height;
     }
     toJSON(){
         return Object.assign(super.toJSON(), {
@@ -535,6 +562,7 @@ const faces = [
     'type4',
 ]
 setInterval(() => {
+    // piece born.
     logger.debug('born.');
     let x = 150;
     let y = 150;
@@ -550,6 +578,7 @@ setInterval(() => {
     piece.set_step(step);
     ccdm.pieces[piece.id] = piece;
 
+    // coin rolling
     ccdm.coin.rolling();
 }, 1000/1*3);
 
