@@ -90,8 +90,10 @@ class SugoGameMaster{
         }
         let piece = new BotPiece(obj);
 
-        obj.y = obj.y - 50;
-        ccdm.coin = new Coin(obj);
+        let obj_coin = Object.assign({}, obj);
+        obj_coin.x = 50;
+        obj_coin.y = 50;
+        ccdm.coin = new Coin(obj_coin);
 
         obj.width = 100;
         obj.height = 100;
@@ -169,12 +171,6 @@ class GameObject extends PhysicsObject{
         super(obj);
         this.angle = obj.angle;
         this.direction = obj.direction;
-
-        // this.logger = STANDERD.logger({
-        //     server_name: SERVER_NAME,
-        //     log_level: server_conf.loglevel,
-        //     name: this.constructor.name,
-        // });
     }
     move(distance){
         const oldX = this.x, oldY = this.y;
@@ -313,7 +309,7 @@ class Step extends PhysicsObject{
         super(obj);
         this.next = obj.next;
         this.back = obj.back;
-        this.events = {};
+        this.events = [];
     }
     toJSON(){
         return Object.assign(super.toJSON(), {
@@ -326,11 +322,28 @@ class Piece extends PhysicsObject{
     constructor(obj={}){
         super(obj);
         this.step = obj.step;
+
+        // let item_obj = Object.assign(obj,{});
+        // item_obj.y = item_obj.y - 50;
+        this.item = {
+            coin: new Coin(),
+        }
+        this.get_item_param();
+    }
+    get_item_param(){
+        this.item.coin.set_prop({
+            x: this.x,
+            y: this.y - 50,
+            width: this.width,
+            height: this.height,
+            item: this.item.coin,
+        });
     }
     set_step(step){
         this.step = step.id;
         this.x = step.x + step.width/2 - this.width/2;
         this.y = step.y + step.height/2 - this.height/2;
+        this.get_item_param();
     }
     next_step(){
         let next = ccdm.steps[this.step].next;
@@ -341,6 +354,7 @@ class Piece extends PhysicsObject{
     toJSON(){
         return Object.assign(super.toJSON(), {
             step: this.step,
+            item: this.item,
         });
     }
 }
@@ -391,24 +405,43 @@ class Coin extends PhysicsObject{
             'c4',
         ];
         this.roll();
+        this.rolling_cool_time = server_conf.cool_time;
+
+        this.cool_timer = setInterval(()=>{
+            if(this.rolling_cool_time > 0){
+                this.rolling_cool_time = this.rolling_cool_time - FPS;
+            }
+        }, 1000/FPS);
         // this.timer = this.rolling();
-        this.logger.debug(`coin state: ${this.state}`);
+        // this.logger.debug(`coin state: ${this.state}`);
     }
     rolling(){
-        clearInterval(this.timer);
-        clearTimeout(this.roll_timer);
-        this.roll_timer = setTimeout(()=>{
+        if(this.rolling_cool_time > 0){
+            this.logger.debug('cool time it now.');
+            return 0;
+        }
+        clearInterval(this.loop_rolling);
+        clearTimeout(this.timer_rolling);
+        this.timer_rolling = setTimeout(()=>{
             this.logger.debug('coin clear timer.');
-            clearInterval(this.timer);
-        }, 800);
+            clearInterval(this.loop_rolling);
+        }, 1000);
         this.logger.debug('coin start timer.');
-        this.timer = setInterval(()=> {
+        this.loop_rolling = setInterval(()=> {
             this.roll();
         }, 1000/FPS);
+        this.rolling_cool_time = server_conf.cool_time;
     }
     roll(){
         let c = Math.floor(Math.random() * 4);
         this.state = this.choices[c];
+    }
+    set_prop(obj){
+        if(!obj){ return }
+        this.x = obj.x;
+        this.y = obj.y;
+        this.width = obj.width;
+        this.height = obj.height;
     }
     toJSON(){
         return Object.assign(super.toJSON(), {
@@ -529,6 +562,7 @@ const faces = [
     'type4',
 ]
 setInterval(() => {
+    // piece born.
     logger.debug('born.');
     let x = 150;
     let y = 150;
@@ -544,8 +578,9 @@ setInterval(() => {
     piece.set_step(step);
     ccdm.pieces[piece.id] = piece;
 
+    // coin rolling
     ccdm.coin.rolling();
-}, 1000/1*5);
+}, 1000/1*3);
 
 if(server_conf.debug_process) {
   let logh = "[Debug Process] ";

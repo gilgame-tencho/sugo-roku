@@ -12,3 +12,4 @@ FIELD_HEIGHT: 1000
 FPS: 30
 move_score: 10
 angle_score: 0.2
+cool_time: 4000

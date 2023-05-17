@@ -143,6 +143,8 @@ socket.on('state', function(ccdm) {
     Object.values(ccdm.pieces).forEach((piece) => {
         ctt_ft.save();
         drawImage(ctt_ft, images.pieces[piece.face], piece);
+        let coin = piece.item.coin;
+        drawImage(ctt_ft, images.coin[coin.state], coin);
         ctt_ft.restore();
     });
     // ccdm.coin
